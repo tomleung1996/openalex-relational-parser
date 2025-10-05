@@ -1,1 +1,4 @@
 data/*
+output/*
+*.pyc
+CWTS-OpenAlex-databases/*
