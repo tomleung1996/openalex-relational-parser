@@ -2,3 +2,4 @@ data/openalex-snapshot-20250930/*
 output/*
 *.pyc
 CWTS-OpenAlex-databases/*
+sqlserver/*
