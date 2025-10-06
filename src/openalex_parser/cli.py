@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import argparse
+import csv
+import gzip
 import sys
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Mapping, Optional
@@ -12,6 +14,7 @@ from .identifiers import StableIdGenerator
 from .json_iter import ProgressReporter, SnapshotReader
 from .reference import EnumerationConfig, EnumerationRegistry
 from .schema import load_schema
+from .utils import canonical_openalex_id
 from .transformers import (
     AuthorTransformer,
     ConceptTransformer,
@@ -133,6 +136,42 @@ def parse_args(argv: Optional[Iterable[str]] = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+
+
+def load_merged_ids(snapshot_root: Path) -> Dict[str, set[str]]:
+    merged_by_entity: Dict[str, set[str]] = {name: set() for name in ENTITY_DATASETS}
+    candidates = [snapshot_root / "merged_ids", snapshot_root.parent / "merged_ids"]
+    merged_root = None
+    for candidate in candidates:
+        if candidate.exists():
+            merged_root = candidate
+            break
+    if merged_root is None:
+        print("No merged_ids directory found; skipping merged ID checks.")
+        return merged_by_entity
+    print(f"Scanning merged_ids under {merged_root}...")
+    for entity, dataset in ENTITY_DATASETS.items():
+        entity_dir = merged_root / dataset
+        if not entity_dir.exists():
+            continue
+        count_before = len(merged_by_entity[entity])
+        for path in sorted(entity_dir.iterdir()):
+            if path.suffix == ".gz":
+                handle = gzip.open(path, "rt", encoding="utf-8")
+            else:
+                handle = path.open("r", encoding="utf-8")
+            with handle as fh:
+                reader = csv.DictReader(fh)
+                for row in reader:
+                    old_id = canonical_openalex_id(row.get("id"))
+                    if old_id:
+                        merged_by_entity[entity].add(old_id)
+        added = len(merged_by_entity[entity]) - count_before
+        if added:
+            print(f"  {entity}: {added} ids marked as merged")
+    return merged_by_entity
+
+
 def register_enumerations(enums: EnumerationRegistry) -> None:
     configs = [
         EnumerationConfig("work_type", "work_type_id", "work_type", bits=15, reference_filename="work_type.csv"),
@@ -233,6 +272,9 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
     enums = EnumerationRegistry(emitter, args.reference_dir)
     register_enumerations(enums)
 
+    merged_ids = load_merged_ids(args.snapshot)
+    print()
+
     reader = SnapshotReader(args.snapshot)
     id_generator = StableIdGenerator()
 
@@ -248,6 +290,8 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
             transformer = build_transformer(entity, emitter, enums, id_generator)
             reporter = ProgressReporter(entity, interval=max(args.progress_interval, 1))
             processed = 0
+            skipped_merged = 0
+            skip_ids = merged_ids.get(entity, set())
             try:
                 for record in reader.iter_entity(
                     dataset,
@@ -256,13 +300,20 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
                     max_records=max_records,
                     progress=reporter,
                 ):
+                    record_id = canonical_openalex_id(record.get("id")) if isinstance(record, dict) else None
+                    if record_id and record_id in skip_ids:
+                        skipped_merged += 1
+                        continue
                     transformer.transform(record)
                     processed += 1
             except FileNotFoundError as exc:
                 print(f"Skipping {entity}: {exc}")
                 overall_counts[entity] = 0
                 continue
-            print(reporter.summary())
+            summary = reporter.summary()
+            if skipped_merged:
+                summary = f"{summary} (skipped {skipped_merged} merged ids)"
+            print(summary)
             overall_counts[entity] = processed
     finally:
         writers.close()
