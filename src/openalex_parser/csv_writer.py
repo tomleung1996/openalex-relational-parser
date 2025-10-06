@@ -1,4 +1,4 @@
-"""CSV writing helpers aligned with the CWTS schema column ordering."""
+﻿"""CSV writing helpers aligned with the CWTS schema column ordering."""
 from __future__ import annotations
 
 import csv
@@ -31,8 +31,9 @@ class CsvTableWriter:
         self.table = table
         self.path = path
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self._handle = self.path.open("w", newline="", encoding="utf-8")
-        self._writer = csv.writer(self._handle)
+        self._handle = self.path.open("w", newline="\n", encoding="utf-8")
+        self._handle.write("\ufeff")
+        self._writer = csv.writer(self._handle, lineterminator="\n")
         self._writer.writerow(self.table.column_names)
 
     def write_row(self, row: Mapping[str, Any]) -> None:
