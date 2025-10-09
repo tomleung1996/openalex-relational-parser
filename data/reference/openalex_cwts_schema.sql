@@ -1352,7 +1352,7 @@ CREATE TABLE public.work_detail (
 	author_et_al varchar(800) NULL,
 	institution_first varchar(200) NULL,
 	institution_et_al varchar(500) NULL,
-	title varchar(450) NULL,
+	title text NULL,
 	"source" varchar(800) NULL,
 	pub_year int2 NULL,
 	volume varchar(100) NULL,
