@@ -20,7 +20,7 @@ CREATE INDEX idx_apc_provenance_name ON public.apc_provenance USING btree (apc_p
 
 CREATE TABLE public.author (
 	author_id int8 NOT NULL,
-	author text NULL,
+	author varchar(2000) NULL,
 	orcid bpchar(19) NULL,
 	openalex_id varchar(11) NULL,
 	scopus_id int8 NULL,
@@ -1352,7 +1352,7 @@ CREATE TABLE public.work_detail (
 	author_et_al varchar(800) NULL,
 	institution_first varchar(200) NULL,
 	institution_et_al varchar(500) NULL,
-	title text NULL,
+	title varchar(2000) NULL,
 	"source" varchar(800) NULL,
 	pub_year int2 NULL,
 	volume varchar(100) NULL,
