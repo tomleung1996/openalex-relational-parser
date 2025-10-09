@@ -27,13 +27,22 @@ def _format_cell(value: Any) -> Any:
 class CsvTableWriter:
     """Writer responsible for a single table."""
 
-    def __init__(self, table: TableDefinition, path: Path) -> None:
+    def __init__(
+        self,
+        table: TableDefinition,
+        path: Path,
+        *,
+        encoding: str = "utf-8",
+        delimiter: str = ",",
+    ) -> None:
         self.table = table
         self.path = path
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self._handle = self.path.open("w", newline="\n", encoding="utf-8")
+        if not delimiter or len(delimiter) != 1:
+            raise ValueError("CSV delimiter must be a single character.")
+        self._handle = self.path.open("w", newline="\n", encoding=encoding)
         self._handle.write("\ufeff")
-        self._writer = csv.writer(self._handle, lineterminator="\n")
+        self._writer = csv.writer(self._handle, lineterminator="\n", delimiter=delimiter)
         self._writer.writerow(self.table.column_names)
 
     def write_row(self, row: Mapping[str, Any]) -> None:
@@ -59,9 +68,18 @@ class CsvTableWriter:
 class CsvWriterManager:
     """Manage multiple CSV writers keyed by table name."""
 
-    def __init__(self, table_definitions: Mapping[str, TableDefinition], output_dir: Path) -> None:
+    def __init__(
+        self,
+        table_definitions: Mapping[str, TableDefinition],
+        output_dir: Path,
+        *,
+        encoding: str = "utf-8",
+        delimiter: str = ",",
+    ) -> None:
         self._table_definitions = dict(table_definitions)
         self._output_dir = output_dir
+        self._encoding = encoding
+        self._delimiter = delimiter
         self._writers: Dict[str, CsvTableWriter] = {}
 
     def writer_for(self, table_name: str) -> CsvTableWriter:
@@ -70,7 +88,12 @@ class CsvWriterManager:
         except KeyError:
             table = self._table_definitions[table_name]
             path = self._output_dir / f"{table.name}.csv"
-            writer = CsvTableWriter(table=table, path=path)
+            writer = CsvTableWriter(
+                table=table,
+                path=path,
+                encoding=self._encoding,
+                delimiter=self._delimiter,
+            )
             self._writers[table_name] = writer
             return writer
 

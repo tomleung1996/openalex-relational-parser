@@ -47,6 +47,8 @@ The command will:
 - `--reference-dir PATH` - Override the directory that contains enumeration CSVs.
 - `--snapshot PATH` - Root of the OpenAlex snapshot (expects subfolders such as `works/`, `authors/`, ...).
 - `--output-dir PATH` - Target directory for CSV exports (default `output`).
+- `--encoding {utf-8,utf-16le}` - Encoding for generated CSV files (default `utf-8`).
+- `--delimiter CHAR` - Single-character delimiter for CSV output (default `,`; pass `\t` for tab-separated values).
 - `--entity NAME` - Process a subset of entities; repeat the flag to list multiple names. Use `--entity all` to run the full pipeline.
 - `--updated-date YYYY-MM-DD` - Restrict processing to specific `updated_date=` partitions (repeatable).
 - `--max-records N` - Limit records per entity (handy for smoke tests). Omit or set to zero for full runs.
@@ -85,7 +87,7 @@ The CLI writes one CSV per table defined in the CWTS schema. File names exactly 
 
 - **Missing data directories:** Ensure `data/openalex-snapshot-20250930/data` contains the OpenAlex gzip folders (works, authors, institutions, and so on). The CLI skips entities whose directories are absent.
 - **Slow smoke tests:** Use `--max-records` and `--max-files` to reduce runtime while verifying changes.
-- **Character encoding:** CSV files are written as UTF-8 with Unix-style newlines.
+- **Character encoding:** CSV files default to UTF-8 with Unix-style newlines; use `--encoding utf-16le` if a different encoding is required.
 
 ## Next Steps
 

@@ -74,6 +74,18 @@ DEDUPE_KEYS: Mapping[str, tuple[str, ...]] = {
 }
 
 
+def _parse_delimiter(value: str) -> str:
+    if not value:
+        raise argparse.ArgumentTypeError("CSV delimiter cannot be empty.")
+    try:
+        normalized = value.encode("utf-8").decode("unicode_escape")
+    except UnicodeDecodeError as exc:
+        raise argparse.ArgumentTypeError(f"Invalid delimiter escape: {value}") from exc
+    if len(normalized) != 1:
+        raise argparse.ArgumentTypeError("CSV delimiter must be a single character.")
+    return normalized
+
+
 def parse_args(argv: Optional[Iterable[str]] = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Convert OpenAlex snapshot JSON into CWTS-compatible CSV files."
@@ -126,6 +138,18 @@ def parse_args(argv: Optional[Iterable[str]] = None) -> argparse.Namespace:
         type=int,
         default=None,
         help="Maximum gzip part files per entity (default: unlimited)",
+    )
+    parser.add_argument(
+        "--encoding",
+        choices=("utf-8", "utf-16le"),
+        default="utf-8",
+        help="Encoding for generated CSV files (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--delimiter",
+        type=_parse_delimiter,
+        default=",",
+        help="Single-character delimiter for generated CSV files (default: ',')",
     )
     parser.add_argument(
         "--progress-interval",
@@ -267,7 +291,12 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
     schema = load_schema(args.schema)
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
-    writers = CsvWriterManager(schema, args.output_dir)
+    writers = CsvWriterManager(
+        schema,
+        args.output_dir,
+        encoding=args.encoding,
+        delimiter=args.delimiter,
+    )
     emitter = TableEmitter(writers, dedupe_keys=DEDUPE_KEYS)
     enums = EnumerationRegistry(emitter, args.reference_dir)
     register_enumerations(enums)
