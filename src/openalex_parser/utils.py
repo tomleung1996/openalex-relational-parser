@@ -115,6 +115,15 @@ def extract_numeric_id(value: Any) -> Optional[int]:
         return None
 
 
+def normalise_language_code(value: Optional[str]) -> Optional[str]:
+    """Return the first two lowercase characters of a language string."""
+
+    if value is None:
+        return None
+    value_str = value[:2].lower()
+    return value_str or None
+
+
 def safe_float(value: Any) -> Optional[float]:
     try:
         return float(value)
@@ -147,6 +156,7 @@ __all__ = [
     "safe_float",
     "bool_from_flag",
     "extract_numeric_id",
+    "normalise_language_code",
 ]
 
 

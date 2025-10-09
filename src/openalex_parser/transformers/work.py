@@ -11,6 +11,7 @@ from ..utils import (
     bool_from_flag,
     canonical_openalex_id,
     extract_numeric_id,
+    normalise_language_code,
     numeric_openalex_id,
     parse_iso_date,
     parse_iso_datetime,
@@ -103,7 +104,7 @@ class WorkTransformer:
         pmcid = extract_numeric_id(ids.get("pmcid"))
         arxiv_id = canonical_openalex_id(ids.get("arxiv"))
 
-        language = record.get("language")
+        language = normalise_language_code(record.get("language"))
         is_paratext = bool_from_flag(record.get("is_paratext"))
         is_retracted = bool_from_flag(record.get("is_retracted"))
 

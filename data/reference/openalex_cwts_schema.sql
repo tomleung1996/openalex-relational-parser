@@ -1177,7 +1177,7 @@ CREATE TABLE public.work (
 	pmid int4 NULL,
 	pmcid int4 NULL,
 	arxiv_id varchar(80) NULL,
-	language_iso2_code bpchar(3) NULL,
+	language_iso2_code bpchar(2) NULL,
 	is_paratext bool NULL,
 	is_retracted bool NULL,
 	is_oa bool NULL,
