@@ -145,6 +145,49 @@ def generate_bulk_insert(tables: List[str]) -> str:
     return '\n'.join(lines)
 
 
+def generate_bcp_commands(tables: List[str]) -> str:
+    lines: List[str] = []
+    lines.append("@echo off")
+    lines.append("setlocal enableextensions")
+    lines.append("REM Update the variables below before running.")
+    lines.append("set \"SERVER=localhost\"")
+    lines.append("set \"DATABASE=openalex\"")
+    lines.append("set \"BASE_PATH=C:\\Path\\To\\CSV\"")
+    lines.append("set \"USERNAME=sql_user\"")
+    lines.append("set \"PASSWORD=StrongPassword!\"")
+    lines.append("set \"FIELD_TERMINATOR=\\t\"")
+    lines.append("set \"ROW_TERMINATOR=\\n\"")
+    lines.append("set \"CODE_PAGE=65001\"")
+    lines.append("")
+    lines.append("if not exist \"%BASE_PATH%\" (")
+    lines.append("    echo Base path \"%BASE_PATH%\" does not exist.")
+    lines.append("    exit /b 1")
+    lines.append(")")
+    lines.append("")
+    lines.append("if /I \"%FIELD_TERMINATOR%\"==\"\\t\" set \"FIELD_TERMINATOR=0x09\"")
+    lines.append("if /I \"%FIELD_TERMINATOR%\"==\"\\n\" set \"FIELD_TERMINATOR=0x0a\"")
+    lines.append("if /I \"%FIELD_TERMINATOR%\"==\"\\r\" set \"FIELD_TERMINATOR=0x0d\"")
+    lines.append("if /I \"%FIELD_TERMINATOR%\"==\"\\r\\n\" set \"FIELD_TERMINATOR=0x0d0a\"")
+    lines.append("if /I \"%ROW_TERMINATOR%\"==\"\\t\" set \"ROW_TERMINATOR=0x09\"")
+    lines.append("if /I \"%ROW_TERMINATOR%\"==\"\\n\" set \"ROW_TERMINATOR=0x0a\"")
+    lines.append("if /I \"%ROW_TERMINATOR%\"==\"\\r\" set \"ROW_TERMINATOR=0x0d\"")
+    lines.append("if /I \"%ROW_TERMINATOR%\"==\"\\r\\n\" set \"ROW_TERMINATOR=0x0d0a\"")
+    lines.append("set \"BCP_CODE_PAGE_OPT=\"")
+    lines.append("if not \"%CODE_PAGE%\"==\"\" set \"BCP_CODE_PAGE_OPT=-C %CODE_PAGE%\"")
+    lines.append("")
+    lines.append("REM If files are compressed (.csv.gz), decompress them before running this script.")
+    lines.append("")
+    for table in tables:
+        csv_file = f"{table}.csv"
+        lines.append(f"echo Importing {table}")
+        lines.append(f"bcp \"%DATABASE%.dbo.{table}\" in \"%BASE_PATH%\\{csv_file}\" -S \"%SERVER%\" -U \"%USERNAME%\" -P \"%PASSWORD%\" -c %BCP_CODE_PAGE_OPT% -t %FIELD_TERMINATOR% -r %ROW_TERMINATOR% -F 2")
+        lines.append("if errorlevel 1 exit /b %errorlevel%")
+        lines.append("")
+    lines.append("echo BCP import completed.")
+    lines.append("endlocal")
+    return '\n'.join(lines)
+
+
 def main() -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     primary_keys, indexes = parse_constraints_and_indexes()
@@ -153,6 +196,7 @@ def main() -> None:
 
     (OUTPUT_DIR / '1.create_tables.sql').write_text(generate_create_tables(), encoding='utf-8')
     (OUTPUT_DIR / '2.bulk_load.sql').write_text(generate_bulk_insert(table_names), encoding='utf-8')
+    (OUTPUT_DIR / '2.bulk_load_bcp.cmd').write_text(generate_bcp_commands(table_names), encoding='utf-8')
     print('SQL Server scripts generated under', OUTPUT_DIR)
     (OUTPUT_DIR / '3.create_indexes.sql').write_text(generate_primary_keys(primary_keys) + '\n' + generate_indexes(indexes), encoding='utf-8')
 
