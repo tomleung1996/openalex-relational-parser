@@ -155,6 +155,7 @@ def generate_bcp_commands(tables: List[str]) -> str:
     lines.append("set \"BASE_PATH=C:\\Path\\To\\CSV\"")
     lines.append("set \"USERNAME=sql_user\"")
     lines.append("set \"PASSWORD=StrongPassword!\"")
+    lines.append("set \"ERROR_DIR=%BASE_PATH%\\errors\"")
     lines.append("set \"FIELD_TERMINATOR=\\t\"")
     lines.append("set \"ROW_TERMINATOR=\\n\"")
     lines.append("set \"CODE_PAGE=65001\"")
@@ -176,12 +177,14 @@ def generate_bcp_commands(tables: List[str]) -> str:
     lines.append("set \"BCP_CODE_PAGE_OPT=\"")
     lines.append("if not \"%CODE_PAGE%\"==\"\" set \"BCP_CODE_PAGE_OPT=-C %CODE_PAGE%\"")
     lines.append("")
+    lines.append("if not exist \"%ERROR_DIR%\" mkdir \"%ERROR_DIR%\"")
+    lines.append("")
     lines.append("REM If files are compressed (.csv.gz), decompress them before running this script.")
     lines.append("")
     for table in tables:
         csv_file = f"{table}.csv"
         lines.append(f"echo Importing {table}")
-        lines.append(f"bcp \"%DATABASE%.dbo.{table}\" in \"%BASE_PATH%\\{csv_file}\" -S \"%SERVER%\" -U \"%USERNAME%\" -P \"%PASSWORD%\" -c %BCP_CODE_PAGE_OPT% -b %BATCH_SIZE% -t %FIELD_TERMINATOR% -r %ROW_TERMINATOR% -F 2")
+        lines.append(f"bcp \"%DATABASE%.dbo.{table}\" in \"%BASE_PATH%\\{csv_file}\" -S \"%SERVER%\" -U \"%USERNAME%\" -P \"%PASSWORD%\" -c %BCP_CODE_PAGE_OPT% -b %BATCH_SIZE% -t %FIELD_TERMINATOR% -r %ROW_TERMINATOR% -F 2 -m 0 -e \"%ERROR_DIR%\\{table}.err\"")
         lines.append("if errorlevel 1 exit /b %errorlevel%")
         lines.append("")
     lines.append("echo BCP import completed.")
