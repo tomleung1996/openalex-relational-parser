@@ -844,7 +844,7 @@ CREATE INDEX idx_publisher_country_code ON public.publisher_country USING btree 
 
 CREATE TABLE public.raw_affiliation_string (
 	raw_affiliation_string_id int8 NOT NULL,
-	raw_affiliation_string varchar(800) NULL,
+	raw_affiliation_string text NULL,
 	CONSTRAINT raw_affiliation_string_pkey PRIMARY KEY (raw_affiliation_string_id)
 );
 CREATE INDEX idx_raw_affil_string ON public.raw_affiliation_string USING btree (raw_affiliation_string);
