@@ -858,7 +858,7 @@ CREATE INDEX idx_raw_affil_string ON public.raw_affiliation_string USING btree (
 
 CREATE TABLE public.raw_author_name (
 	raw_author_name_id int8 NOT NULL,
-	raw_author_name varchar(800) NULL,
+	raw_author_name text NULL,
 	CONSTRAINT raw_author_name_pkey PRIMARY KEY (raw_author_name_id)
 );
 CREATE INDEX idx_raw_author_name ON public.raw_author_name USING btree (raw_author_name);
