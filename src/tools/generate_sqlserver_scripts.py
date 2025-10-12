@@ -184,7 +184,7 @@ def generate_bcp_commands(tables: List[str]) -> str:
     for table in tables:
         csv_file = f"{table}.csv"
         lines.append(f"echo Importing {table}")
-        lines.append(f"bcp \"%DATABASE%.dbo.{table}\" in \"%BASE_PATH%\\{csv_file}\" -S \"%SERVER%\" -U \"%USERNAME%\" -P \"%PASSWORD%\" -c %BCP_CODE_PAGE_OPT% -b %BATCH_SIZE% -t %FIELD_TERMINATOR% -r %ROW_TERMINATOR% -F 2 -m 0 -e \"%ERROR_DIR%\\{table}.err\"")
+        lines.append(f"bcp \"%DATABASE%.dbo.{table}\" in \"%BASE_PATH%\\{csv_file}\" -S \"%SERVER%\" -U \"%USERNAME%\" -P \"%PASSWORD%\" -c %BCP_CODE_PAGE_OPT% -b %BATCH_SIZE% -t %FIELD_TERMINATOR% -r %ROW_TERMINATOR% -F 2 -m 1 -e \"%ERROR_DIR%\\{table}.err\"")
         lines.append("if errorlevel 1 exit /b %errorlevel%")
         lines.append("")
     lines.append("echo BCP import completed.")
