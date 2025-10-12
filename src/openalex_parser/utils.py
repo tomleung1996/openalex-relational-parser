@@ -176,6 +176,7 @@ def canonical_wikidata_id(value: Optional[str]) -> Optional[str]:
 
 
 _ORCID_PATTERN = re.compile(r"\d{4}-\d{4}-\d{4}-\d{3}[0-9X]", re.IGNORECASE)
+_SCOPUS_AUTHOR_ID_PATTERN = re.compile(r"authorid=(\d+)", re.IGNORECASE)
 
 
 def canonical_orcid(value: Optional[str]) -> Optional[str]:
@@ -193,25 +194,29 @@ def canonical_orcid(value: Optional[str]) -> Optional[str]:
 
 
 def extract_scopus_author_id(value: Optional[str]) -> Optional[int]:
-    """Extract the numerical Scopus author id from assorted identifier formats."""
+    """Extract the Scopus author identifier from known URL formats."""
 
-    if not value:
+    if value is None:
         return None
-    value = value.strip()
-    if not value:
-        return None
-    import re
 
-    match = re.search(r'(?:authorID=)?(\d{5,})', value)
+    value_str = str(value).strip()
+    if not value_str:
+        return None
+
+    match = _SCOPUS_AUTHOR_ID_PATTERN.search(value_str)
     if match:
         try:
             return int(match.group(1))
         except ValueError:
             return None
-    try:
-        return int(value)
-    except ValueError:
-        return None
+
+    if value_str.isdigit():
+        try:
+            return int(value_str)
+        except ValueError:
+            return None
+
+    return None
 
 
 __all__.extend([
