@@ -176,6 +176,7 @@ def canonical_wikidata_id(value: Optional[str]) -> Optional[str]:
 
 
 _ORCID_PATTERN = re.compile(r"\d{4}-\d{4}-\d{4}-\d{3}[0-9X]", re.IGNORECASE)
+_ORCID_COMPACT_PATTERN = re.compile(r"\b\d{15}[0-9X]\b", re.IGNORECASE)
 _SCOPUS_AUTHOR_ID_PATTERN = re.compile(r"authorid=(\d+)", re.IGNORECASE)
 
 
@@ -190,7 +191,15 @@ def canonical_orcid(value: Optional[str]) -> Optional[str]:
     match = _ORCID_PATTERN.search(value)
     if match:
         return match.group(0).upper()
-    return value or None
+    compact_match = _ORCID_COMPACT_PATTERN.search(value)
+    if compact_match:
+        raw = compact_match.group(0).upper()
+        return "-".join((raw[0:4], raw[4:8], raw[8:12], raw[12:16]))
+    stripped = re.sub(r"[^0-9Xx]", "", value)
+    if len(stripped) == 16 and re.fullmatch(r"\d{15}[0-9X]", stripped, flags=re.IGNORECASE):
+        stripped = stripped.upper()
+        return "-".join((stripped[0:4], stripped[4:8], stripped[8:12], stripped[12:16]))
+    return None
 
 
 def extract_scopus_author_id(value: Optional[str]) -> Optional[int]:
