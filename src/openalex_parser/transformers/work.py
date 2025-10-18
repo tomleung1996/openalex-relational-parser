@@ -51,7 +51,7 @@ def _sdg_id_from_url(url: Optional[str]) -> Optional[int]:
 def _normalise_text(value: Optional[str]) -> Optional[str]:
     if not value:
         return None
-    normalised = " ".join(value.replace("\r", " ").replace("\n", " ").replace("\t", " ").split())
+    normalised = " ".join(value.replace("\r", " ").replace("\n", " ").replace("\t", " "))
     return normalised or None
 
 
