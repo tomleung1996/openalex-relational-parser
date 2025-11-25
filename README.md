@@ -1,6 +1,8 @@
 # OpenAlex Relational Parser
 
-This project converts OpenAlex snapshot JSONL files into relational CSV exports that follow the CWTS OpenAlex schema. Every table in the schema except `citation` and `work_detail` is materialised directly (those two are created downstream in SQL after loading). The current schema contains 88 tables, and the converter automatically adapts if CWTS adds or removes tables. A Chinese translation of this document is available in [README.zh.md](README.zh.md).
+### [中文版](README.zh.md)
+
+This project converts OpenAlex snapshot JSONL files into relational CSV exports that follow the CWTS OpenAlex schema. Every table in the schema except `citation` and `work_detail` is materialised directly (those two are created downstream in SQL after loading). The current schema contains 88 tables, and the converter automatically adapts if CWTS adds or removes tables.
 
 > The OpenAlex relational schema was designed by Dr. Nees Jan van Eck and the CWTS team at Leiden University. They deserve full credit for that work. The maintainers of this repository are solely responsible for the parsing code presented here. See the CWTS reference implementation and schema resources at https://github.com/CWTSLeiden/CWTS-OpenAlex-databases.
 
