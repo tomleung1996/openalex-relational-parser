@@ -1,5 +1,7 @@
 # OpenAlex 数据关系型解析器
 
+### [English Version](README.md)
+
 本项目将 OpenAlex 快照（JSON Lines）转换为符合 CWTS OpenAlex 关系型模式的 CSV 导入文件。除了 `citation` 和 `work_detail` 这两个需要在数据库内后处理生成的表以外，模式中的每一张表都会被直接导出。当前 CWTS 模式包含 88 张表；一旦 CWTS 更新模式，解析器会自动跟随变更。
 
 > OpenAlex 关系型模式由莱顿大学 CWTS 的 Nees Jan van Eck 博士及其团队设计。本项目仅实现解析器代码，原始模式及参考实现请见 https://github.com/CWTSLeiden/CWTS-OpenAlex-databases 。
@@ -112,5 +114,7 @@ python -m openalex_parser.cli --entity authors --entity institutions --skip-merg
 
 - 在数据库内编写 SQL 视图或作业，生成 `citation`、`work_detail` 以及其他分析字段。
 - 构建自动化校验流程，将生成的 CSV 头部与 CWTS 模式比对，以便及时发现模式更新。
+
+**版本提醒**：`output/reference_ids/` 内的枚举与命名空间 CSV 仅对应生成它们的那份 snapshot。更换 OpenAlex 快照版本时，请先清空或移动该目录，让 CLI 重新执行 collect 阶段，否则缺失的 reference ID 会导致解析报错。
 
 祝解析顺利！

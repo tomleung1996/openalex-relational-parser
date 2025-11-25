@@ -100,4 +100,6 @@ python -m openalex_parser.cli --entity authors --entity institutions --skip-merg
 - **Merged records:** Supply `--skip-merged-ids` to ignore IDs listed in `merged_ids/` directories that accompany the snapshot.
 - **Character encoding or delimiters:** Override `--encoding` or `--delimiter` to match your loading environment (SQL Server often prefers UTF-16LE with tab delimiters).
 
+**Version reminder:** The enumeration and namespace CSVs in `output/reference_ids/` reflect only the snapshot that produced them. When switching to a different OpenAlex release, clear or relocate that directory so the CLI can rerun the collect phase; otherwise missing reference IDs will raise errors.
+
 Happy parsing!
