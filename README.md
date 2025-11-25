@@ -1,8 +1,8 @@
 # OpenAlex Relational Parser
 
-This project converts OpenAlex snapshot JSONL files into relational CSV exports that follow the CWTS OpenAlex schema. Every table in the schema except `citation` and `work_detail` is materialised directly (those two are created downstream in SQL after loading). The current schema contains 88 tables, and the converter automatically adapts if CWTS adds or removes tables.
+This project converts OpenAlex snapshot JSONL files into relational CSV exports that follow the CWTS OpenAlex schema. Every table in the schema except `citation` and `work_detail` is materialised directly (those two are created downstream in SQL after loading). The current schema contains 88 tables, and the converter automatically adapts if CWTS adds or removes tables. A Chinese translation of this document is available in [README.zh.md](README.zh.md).
 
-> The OpenAlex relational schema was designed by Dr. Nees Jan van Eck and the CWTS team at Leiden University. They deserve full credit for that work. The maintainers of this repository are solely responsible for the parsing code presented here.
+> The OpenAlex relational schema was designed by Dr. Nees Jan van Eck and the CWTS team at Leiden University. They deserve full credit for that work. The maintainers of this repository are solely responsible for the parsing code presented here. See the CWTS reference implementation and schema resources at https://github.com/CWTSLeiden/CWTS-OpenAlex-databases.
 
 ## Repository Layout
 
@@ -10,15 +10,15 @@ This project converts OpenAlex snapshot JSONL files into relational CSV exports 
 openalex-relational-parser/
 |-- data/
 |   |-- openalex-snapshot-YYYYMMDD/      # OpenAlex JSON snapshot (gzip files)
-|   `-- reference/
-|       `-- openalex_cwts_schema.sql     # CWTS schema definition (copy for convenience)
+|   |-- reference/
+|       |-- openalex_cwts_schema.sql     # CWTS schema definition (copy for convenience)
 |-- output/                              # Generated CSVs plus collected IDs (created after running)
-|   `-- reference_ids/                   # Enumerations + namespace assignments written by the CLI
-`-- src/
-    `-- openalex_parser/
+|   |-- reference_ids/                   # Enumerations + namespace assignments written by the CLI
+|-- src/
+    |-- openalex_parser/
         |-- cli.py                       # Command-line entry point
         |-- transformers/                # JSON -> CSV mappers for each entity
-        `-- ...                          # Shared utilities, schema loader, emitters, etc.
+        |-- ...                          # Shared utilities, schema loader, emitters, etc.
 ```
 
 ## Installation
@@ -39,6 +39,7 @@ All CSVs use schema column order, `\t` as the default delimiter, UTF-8 encoding,
 Run the CLI module from the repository root:
 
 ```
+set PYTHONPATH=src  # PowerShell/CMD; use 'export PYTHONPATH=src' on bash/zsh
 python -m openalex_parser.cli --entity all --output-dir output
 ```
 
